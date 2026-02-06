@@ -121,7 +121,7 @@ button:disabled {
         <li>Scan the FIRST ID</li>
         <li>Wait for confirmation</li>
         <li>Scan the SECOND ID</li>
-        <li>Generate Love Team</li>
+        <li>Generate Result</li>
     </ol>
     <button onclick="startScan()">Proceed to Scan</button>
 </div>
@@ -200,7 +200,7 @@ function onScanSuccess(text) {
 
     if (step === 1) {
         firstName = name;
-        alert("First Id done scan proceed to the next id");
+        // Removed alert showing first scanned name
         scanStatus.innerText = "✔ First ID recorded. Scan SECOND ID";
         step = 2;
 
@@ -210,8 +210,12 @@ function onScanSuccess(text) {
 
     } else if (step === 2 && name !== firstName) {
         secondName = name;
-        alert("Second Id done scan proceed to generate love team");
+        alert("Second Id done scan, proceed to generate result"); // updated message
         scanStatus.innerText = "✔ Both IDs scanned successfully";
+
+        // Change button text after scanning second ID
+        generateBtn.innerText = "Generate Result";
+
         generateBtn.disabled = false;
         scanner.stop();
     }
