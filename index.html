@@ -203,7 +203,7 @@ function onScanSuccess(text) {
 
     if (step === 1) {
         firstName = name;
-        firstResult.innerHTML = "✅ First ID scanned: <b>" + firstName + "</b>";
+        alert("First Id done scan proceed to the next id");
         scanStatus.innerText = "✔ First ID recorded. Scan SECOND ID";
         step = 2;
 
@@ -213,7 +213,7 @@ function onScanSuccess(text) {
 
     } else if (step === 2 && name !== firstName) {
         secondName = name;
-        secondResult.innerHTML = "✅ Second ID scanned: <b>" + secondName + "</b>";
+        alert("Second Id done scan proceed to generate love team");
         scanStatus.innerText = "✔ Both IDs scanned successfully";
         generateBtn.disabled = false;
         scanner.stop();
