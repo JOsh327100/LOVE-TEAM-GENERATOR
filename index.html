@@ -177,6 +177,9 @@ const messages = [
 function goGuide() {
     intro.style.display = "none";
     guide.style.display = "block";
+    // Play music on user interaction for mobile compatibility
+    const music = document.getElementById("bgMusic");
+    music.play().catch(() => {});
 }
 
 function startScan() {
