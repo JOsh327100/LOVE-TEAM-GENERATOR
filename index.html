@@ -174,7 +174,6 @@ const messages = [
 function goGuide() {
     intro.style.display = "none";
     guide.style.display = "block";
-    // Play music on user interaction for mobile compatibility
     const music = document.getElementById("bgMusic");
     music.play().catch(() => {});
 }
@@ -200,7 +199,6 @@ function onScanSuccess(text) {
 
     if (step === 1) {
         firstName = name;
-        // Removed alert showing first scanned name
         scanStatus.innerText = "✔ First ID recorded. Scan SECOND ID";
         step = 2;
 
@@ -208,9 +206,9 @@ function onScanSuccess(text) {
             scanLocked = false;
         }, 1500);
 
-    } else if (step === 2 && name !== firstName) {
+    } else if (step === 2) {
         secondName = name;
-        alert("Second Id done scan, proceed to generate result"); // updated message
+        alert("Second Id done scan, proceed to generate result");
         scanStatus.innerText = "✔ Both IDs scanned successfully";
 
         // Change button text after scanning second ID
@@ -272,9 +270,7 @@ const resultSection = document.getElementById("resultSection");
 /* AUTO PLAY MUSIC */
 window.addEventListener('load', () => {
     const music = document.getElementById("bgMusic");
-    music.play().catch(() => {
-        // Autoplay blocked, will play on user interaction
-    });
+    music.play().catch(() => {});
 });
 </script>
 
