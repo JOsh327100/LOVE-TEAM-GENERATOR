@@ -13,6 +13,22 @@ body {
     background: #ffe6f2;
     text-align: center;
     margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+#bgVideo {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: -2;
 }
 
 .section {
@@ -85,15 +101,22 @@ button:disabled {
     font-weight: bold;
     color: #cc0066;
 }
+
+
 </style>
 </head>
 
 <body>
 
 <!-- BACKGROUND MUSIC -->
-<audio id="bgMusic" loop>
-    <source src="music.mp3" type="audio/mpeg">
+<audio id="bgMusic" loop autoplay>
+    <source src="cupid.mp3" type="audio/mpeg">
 </audio>
+
+<!-- BACKGROUND VIDEO -->
+<video id="bgVideo" autoplay muted loop>
+    <source src="hearts.mp4" type="video/mp4">
+</video>
 
 <!-- INTRO -->
 <div class="section" id="intro">
@@ -254,6 +277,21 @@ const guide = document.getElementById("guide");
 const scannerDiv = document.getElementById("scanner");
 const loading = document.getElementById("loading");
 const resultSection = document.getElementById("resultSection");
+
+/* FLYING HEARTS ANIMATION */
+function createHeart() {
+    const heart = document.createElement('div');
+    heart.className = 'heart';
+    heart.innerHTML = '❤️';
+    heart.style.left = Math.random() * 100 + 'vw';
+    heart.style.animationDelay = Math.random() * 10 + 's';
+    document.body.appendChild(heart);
+    setTimeout(() => {
+        heart.remove();
+    }, 10000);
+}
+
+setInterval(createHeart, 2000);
 </script>
 
 </body>
