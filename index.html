@@ -5,9 +5,6 @@
 <title>💖 Love Team Generator</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
-<!-- PWA -->
-<link rel="manifest" href="manifest.json">
-
 <script src="https://unpkg.com/html5-qrcode"></script>
 
 <style>
@@ -48,9 +45,18 @@ button.secondary {
     background: #999;
 }
 
+button:disabled {
+    background: gray;
+}
+
 #reader {
     width: 280px;
     margin: auto;
+}
+
+.status {
+    font-weight: bold;
+    margin-top: 10px;
 }
 
 .loader {
@@ -69,7 +75,7 @@ button.secondary {
 }
 
 .result {
-    font-size: 26px;
+    font-size: 28px;
     color: #e60073;
     margin-top: 10px;
 }
@@ -84,71 +90,86 @@ button.secondary {
 
 <body>
 
+<!-- BACKGROUND MUSIC -->
 <audio id="bgMusic" loop>
     <source src="music.mp3" type="audio/mpeg">
 </audio>
 
+<!-- INTRO -->
 <div class="section" id="intro">
     <h1>💘 Love Team Generator</h1>
-    <p>Scan two ID QR codes and discover your Love Team.</p>
-    <button onclick="startGuide()">Start</button>
-    <button class="secondary" onclick="toggleMusic()">🎵 Music On/Off</button>
+    <p>Scan two ID QR codes to generate a Love Team.</p>
+    <button onclick="goGuide()">Start</button>
+    <button class="secondary" onclick="toggleMusic()">🎵 Music On / Off</button>
 </div>
 
+<!-- GUIDE -->
 <div class="section" id="guide" style="display:none;">
-    <h2>📋 Guide</h2>
+    <h2>📋 User Guide</h2>
     <ol style="text-align:left;">
         <li>Allow camera access</li>
-        <li>Scan First ID</li>
-        <li>Scan Second ID</li>
+        <li>Scan the FIRST ID</li>
+        <li>Wait for confirmation</li>
+        <li>Scan the SECOND ID</li>
         <li>Generate Love Team</li>
     </ol>
-    <button onclick="startScanner()">Proceed</button>
+    <button onclick="startScan()">Proceed to Scan</button>
 </div>
 
+<!-- SCANNER -->
 <div class="section" id="scanner" style="display:none;">
-    <h2>📷 Scan IDs</h2>
-    <p id="status">Scan FIRST ID</p>
+    <h2>📷 QR Code Scanner</h2>
+    <p class="status" id="scanStatus">Scan FIRST ID</p>
+
     <div id="reader"></div>
-    <p id="first"></p>
-    <p id="second"></p>
-    <button onclick="generate()" id="genBtn" disabled>Generate Love Team</button>
+
+    <p id="firstResult"></p>
+    <p id="secondResult"></p>
+
+    <button id="generateBtn" onclick="generateLoveTeam()" disabled>
+        Generate Love Team
+    </button>
 </div>
 
+<!-- LOADING -->
 <div class="section" id="loading" style="display:none;">
-    <h2>💞 Generating...</h2>
+    <h2>💞 Generating Love Team...</h2>
     <div class="loader"></div>
-    <p>Please wait</p>
+    <p>Please wait (5 seconds)</p>
 </div>
 
+<!-- RESULT -->
 <div class="section" id="resultSection" style="display:none;">
-    <h2>❤️ Result ❤️</h2>
+    <h2>❤️ Love Team Result ❤️</h2>
     <div class="result" id="loveTeam"></div>
-    <div class="percent" id="percent"></div>
-    <p id="message"></p>
-    <button onclick="resetScan()">🔄 Scan Again</button>
+    <div class="percent" id="compatibility"></div>
+    <p id="loveMessage"></p>
+    <button onclick="resetSystem()">🔄 Scan Again</button>
 </div>
 
 <script>
+/* VARIABLES */
 let step = 1;
 let firstName = "";
 let secondName = "";
 let scanner;
+let scanLocked = false;
 
 const messages = [
     "A match made in destiny 💕",
     "True love always finds a way 💖",
-    "You two are meant to shine together ✨",
-    "Love is stronger with you two 💞",
-    "A perfect blend of hearts ❤️"
+    "Perfect chemistry ✨",
+    "Two hearts, one story 💞",
+    "Love shines brighter together ❤️"
 ];
 
-function startGuide() {
+/* NAVIGATION */
+function goGuide() {
     intro.style.display = "none";
     guide.style.display = "block";
 }
 
-function startScanner() {
+function startScan() {
     guide.style.display = "none";
     scannerDiv.style.display = "block";
 
@@ -156,29 +177,38 @@ function startScanner() {
     scanner.start(
         { facingMode: "environment" },
         { fps: 10, qrbox: 200 },
-        scanSuccess
+        onScanSuccess
     );
 }
 
-function scanSuccess(text) {
-    let name = extractFirstName(text);
+/* SCAN HANDLER (FIXED NOTIFICATION) */
+function onScanSuccess(text) {
+    if (scanLocked) return;
+    scanLocked = true;
+
+    const name = extractFirstName(text);
 
     if (step === 1) {
         firstName = name;
-        first.innerText = "First ID: " + name;
-        status.innerText = "Scan SECOND ID";
+        firstResult.innerHTML = "✅ First ID scanned: <b>" + firstName + "</b>";
+        scanStatus.innerText = "✔ First ID recorded. Scan SECOND ID";
         step = 2;
+
+        setTimeout(() => {
+            scanLocked = false;
+        }, 1500);
 
     } else if (step === 2 && name !== firstName) {
         secondName = name;
-        second.innerText = "Second ID: " + name;
-        status.innerText = "Ready to Generate ✔";
-        genBtn.disabled = false;
+        secondResult.innerHTML = "✅ Second ID scanned: <b>" + secondName + "</b>";
+        scanStatus.innerText = "✔ Both IDs scanned successfully";
+        generateBtn.disabled = false;
         scanner.stop();
     }
 }
 
-function generate() {
+/* GENERATE LOVE TEAM */
+function generateLoveTeam() {
     scannerDiv.style.display = "none";
     loading.style.display = "block";
 
@@ -186,24 +216,30 @@ function generate() {
         loading.style.display = "none";
         resultSection.style.display = "block";
 
-        loveTeam.innerText = combine(firstName, secondName);
-        percent.innerText = Math.floor(Math.random() * 21 + 80) + "%";
-        message.innerText = messages[Math.floor(Math.random() * messages.length)];
+        loveTeam.innerText = combineNames(firstName, secondName);
+        compatibility.innerText = randomPercent() + "%";
+        loveMessage.innerText =
+            messages[Math.floor(Math.random() * messages.length)];
     }, 5000);
 }
 
-function combine(a, b) {
-    let aPart = a.substring(0, Math.ceil(a.length / 2));
-    let bPart = b.substring(Math.floor(b.length / 2));
-    let name = aPart + bPart;
-    return name.charAt(0).toUpperCase() + name.slice(1).toLowerCase();
-}
-
+/* HELPERS */
 function extractFirstName(text) {
     return text.trim().split(" ")[0].replace(/[^A-Za-z]/g, "");
 }
 
-function resetScan() {
+function combineNames(a, b) {
+    const aPart = a.substring(0, Math.ceil(a.length / 2));
+    const bPart = b.substring(Math.floor(b.length / 2));
+    const name = aPart + bPart;
+    return name.charAt(0).toUpperCase() + name.slice(1).toLowerCase();
+}
+
+function randomPercent() {
+    return Math.floor(Math.random() * 21) + 80; // 80–100%
+}
+
+function resetSystem() {
     location.reload();
 }
 
@@ -212,11 +248,7 @@ function toggleMusic() {
     music.paused ? music.play() : music.pause();
 }
 
-// PWA
-if ("serviceWorker" in navigator) {
-    navigator.serviceWorker.register("sw.js");
-}
-
+/* ELEMENT REFERENCES */
 const intro = document.getElementById("intro");
 const guide = document.getElementById("guide");
 const scannerDiv = document.getElementById("scanner");
