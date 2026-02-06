@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>💖 Love Team Generator</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<!-- PWA -->
+<link rel="manifest" href="manifest.json">
+
+<script src="https://unpkg.com/html5-qrcode"></script>
+
+<style>
+body {
+    font-family: Arial, sans-serif;
+    background: #ffe6f2;
+    text-align: center;
+    margin: 0;
+}
+
+.section {
+    background: white;
+    margin: 20px auto;
+    padding: 20px;
+    width: 90%;
+    max-width: 400px;
+    border-radius: 12px;
+    box-shadow: 0 0 12px pink;
+}
+
+h1, h2 {
+    color: #cc0066;
+}
+
+button {
+    padding: 10px;
+    width: 100%;
+    background: #e60073;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    margin-top: 10px;
+    cursor: pointer;
+}
+
+button.secondary {
+    background: #999;
+}
+
+#reader {
+    width: 280px;
+    margin: auto;
+}
+
+.loader {
+    border: 6px solid #f3f3f3;
+    border-top: 6px solid #e60073;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    animation: spin 1s linear infinite;
+    margin: 15px auto;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.result {
+    font-size: 26px;
+    color: #e60073;
+    margin-top: 10px;
+}
+
+.percent {
+    font-size: 40px;
+    font-weight: bold;
+    color: #cc0066;
+}
+</style>
+</head>
+
+<body>
+
+<audio id="bgMusic" loop>
+    <source src="music.mp3" type="audio/mpeg">
+</audio>
+
+<div class="section" id="intro">
+    <h1>💘 Love Team Generator</h1>
+    <p>Scan two ID QR codes and discover your Love Team.</p>
+    <button onclick="startGuide()">Start</button>
+    <button class="secondary" onclick="toggleMusic()">🎵 Music On/Off</button>
+</div>
+
+<div class="section" id="guide" style="display:none;">
+    <h2>📋 Guide</h2>
+    <ol style="text-align:left;">
+        <li>Allow camera access</li>
+        <li>Scan First ID</li>
+        <li>Scan Second ID</li>
+        <li>Generate Love Team</li>
+    </ol>
+    <button onclick="startScanner()">Proceed</button>
+</div>
+
+<div class="section" id="scanner" style="display:none;">
+    <h2>📷 Scan IDs</h2>
+    <p id="status">Scan FIRST ID</p>
+    <div id="reader"></div>
+    <p id="first"></p>
+    <p id="second"></p>
+    <button onclick="generate()" id="genBtn" disabled>Generate Love Team</button>
+</div>
+
+<div class="section" id="loading" style="display:none;">
+    <h2>💞 Generating...</h2>
+    <div class="loader"></div>
+    <p>Please wait</p>
+</div>
+
+<div class="section" id="resultSection" style="display:none;">
+    <h2>❤️ Result ❤️</h2>
+    <div class="result" id="loveTeam"></div>
+    <div class="percent" id="percent"></div>
+    <p id="message"></p>
+    <button onclick="resetScan()">🔄 Scan Again</button>
+</div>
+
+<script>
+let step = 1;
+let firstName = "";
+let secondName = "";
+let scanner;
+
+const messages = [
+    "A match made in destiny 💕",
+    "True love always finds a way 💖",
+    "You two are meant to shine together ✨",
+    "Love is stronger with you two 💞",
+    "A perfect blend of hearts ❤️"
+];
+
+function startGuide() {
+    intro.style.display = "none";
+    guide.style.display = "block";
+}
+
+function startScanner() {
+    guide.style.display = "none";
+    scannerDiv.style.display = "block";
+
+    scanner = new Html5Qrcode("reader");
+    scanner.start(
+        { facingMode: "environment" },
+        { fps: 10, qrbox: 200 },
+        scanSuccess
+    );
+}
+
+function scanSuccess(text) {
+    let name = extractFirstName(text);
+
+    if (step === 1) {
+        firstName = name;
+        first.innerText = "First ID: " + name;
+        status.innerText = "Scan SECOND ID";
+        step = 2;
+
+    } else if (step === 2 && name !== firstName) {
+        secondName = name;
+        second.innerText = "Second ID: " + name;
+        status.innerText = "Ready to Generate ✔";
+        genBtn.disabled = false;
+        scanner.stop();
+    }
+}
+
+function generate() {
+    scannerDiv.style.display = "none";
+    loading.style.display = "block";
+
+    setTimeout(() => {
+        loading.style.display = "none";
+        resultSection.style.display = "block";
+
+        loveTeam.innerText = combine(firstName, secondName);
+        percent.innerText = Math.floor(Math.random() * 21 + 80) + "%";
+        message.innerText = messages[Math.floor(Math.random() * messages.length)];
+    }, 5000);
+}
+
+function combine(a, b) {
+    let aPart = a.substring(0, Math.ceil(a.length / 2));
+    let bPart = b.substring(Math.floor(b.length / 2));
+    let name = aPart + bPart;
+    return name.charAt(0).toUpperCase() + name.slice(1).toLowerCase();
+}
+
+function extractFirstName(text) {
+    return text.trim().split(" ")[0].replace(/[^A-Za-z]/g, "");
+}
+
+function resetScan() {
+    location.reload();
+}
+
+function toggleMusic() {
+    const music = document.getElementById("bgMusic");
+    music.paused ? music.play() : music.pause();
+}
+
+// PWA
+if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("sw.js");
+}
+
+const intro = document.getElementById("intro");
+const guide = document.getElementById("guide");
+const scannerDiv = document.getElementById("scanner");
+const loading = document.getElementById("loading");
+const resultSection = document.getElementById("resultSection");
+</script>
+
+</body>
+</html>
