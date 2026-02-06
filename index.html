@@ -126,7 +126,17 @@ button:disabled {
     <button onclick="startScan()">Proceed to Scan</button>
 </div>
 
+<!-- SCANNER -->
+<div class="section" id="scanner" style="display:none;">
+    <h2>📷 QR Code Scanner</h2>
+    <p class="status" id="scanStatus">Scan FIRST ID</p>
 
+    <div id="reader"></div>
+
+    <button id="generateBtn" onclick="generateLoveTeam()" disabled>
+        Generate Love Team
+    </button>
+</div>
 
 <!-- LOADING -->
 <div class="section" id="loading" style="display:none;">
@@ -266,4 +276,3 @@ window.addEventListener('load', () => {
 
 </body>
 </html>
-
